@@ -7,8 +7,12 @@
       height: 100vh;
       background-color: #121212;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      gap: 16px;
+      color: white;
+      font-family: sans-serif;
     }
 
     button {
@@ -24,12 +28,79 @@
     input {
       display: none;
     }
+
+    img {
+      max-width: 300px;
+      border-radius: 16px;
+      display: none;
+    }
+
+    #status {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
   <button onclick="fileInput.click()">Import</button>
   <input id="fileInput" type="file" accept=".png,.jpg,.jpeg">
+  <img id="preview">
+  <div id="status">Copied to clipboard!</div>
+
+  <script>
+    const size = 200
+
+    fileInput.onchange = () => {
+      const file = fileInput.files[0]
+      if (!file) return
+
+      const img = new Image()
+      const reader = new FileReader()
+
+      reader.onload = () => {
+        img.src = reader.result
+      }
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        canvas.width = size
+        canvas.height = size
+        const ctx = canvas.getContext("2d")
+
+        ctx.drawImage(img, 0, 0, size, size)
+
+        preview.src = canvas.toDataURL()
+        preview.style.display = "block"
+
+        const imageData = ctx.getImageData(0, 0, size, size).data
+        let output = ""
+
+        for (let x = 0; x < size; x++) {
+          for (let y = 0; y < size; y++) {
+            const index = (y * size + x) * 4
+            const r = imageData[index]
+            const g = imageData[index + 1]
+            const b = imageData[index + 2]
+
+            const outx = r + "," + g + "," + b
+
+            if (y * x === size * size || x + y === (size - 1) * 2) {
+              output += outx
+            } else {
+              output += outx + ";"
+            }
+          }
+        }
+
+        navigator.clipboard.writeText(output)
+        status.style.display = "block"
+        status.innerText = "Copied to clipboard!"
+      }
+
+      reader.readAsDataURL(file)
+    }
+  </script>
+
 
 </body>
 </html>
