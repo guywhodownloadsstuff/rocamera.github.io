@@ -72,52 +72,55 @@
   <textarea id="outputBox" placeholder="Output will appear here"></textarea>
 
   <script>
-    fileInput.onchange = () => {
-      const file = fileInput.files[0]
-      if (!file) return
+  fileInput.onchange = () => {
+    const file = fileInput.files[0]
+    if (!file) return
 
-      const size = parseInt(sizeInput.value) || 200
+    const size = parseInt(sizeInput.value) || 200
 
-      const img = new Image()
-      const reader = new FileReader()
+    const img = new Image()
+    const reader = new FileReader()
 
-      reader.onload = () => {
-        img.src = reader.result
-      }
-
-      img.onload = () => {
-        const canvas = document.createElement("canvas")
-        canvas.width = size
-        canvas.height = size
-        const ctx = canvas.getContext("2d")
-
-        ctx.drawImage(img, 0, 0, size, size)
-
-        preview.src = canvas.toDataURL()
-        preview.style.display = "block"
-
-        const data = ctx.getImageData(0, 0, size, size).data
-        let output = "["
-
-        for (let y = 0; y < size; y++) {
-          for (let x = 0; x < size; x++) {
-            const i = (y * size + x) * 4
-            const r = data[i]
-            const g = data[i + 1]
-            const b = data[i + 2]
-
-            output += "[" + r + "," + g + "," + b + "],"
-          }
-        }
-
-        output += "]"
-
-        outputBox.value = output
-      }
-
-      reader.readAsDataURL(file)
+    reader.onload = () => {
+      img.src = reader.result
     }
-  </script>
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext("2d")
+
+      ctx.drawImage(img, 0, 0, size, size)
+
+      preview.src = canvas.toDataURL()
+      preview.style.display = "block"
+
+      const data = ctx.getImageData(0, 0, size, size).data
+      let output = "["
+      const total = size * size
+      let count = 0
+
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const i = (y * size + x) * 4
+          const r = data[i]
+          const g = data[i + 1]
+          const b = data[i + 2]
+
+          count++
+          output += "[" + r + "," + g + "," + b + "]"
+          if (count < total) output += ","
+        }
+      }
+
+      output += "]"
+      outputBox.value = output
+    }
+
+    reader.readAsDataURL(file)
+  }
+</script>
 
 </body>
 </html>
